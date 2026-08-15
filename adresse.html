@@ -1,3 +1,5 @@
+$ cat /Users/gilles/Desktop/bot/webapp/adresse.html
+
 <!doctype html>
 <html lang="de">
 <head>
@@ -29,7 +31,7 @@
     margin: 16px 0 6px;
     color: var(--tg-theme-hint-color, #666666);
   }
-  input, textarea {
+  input, textarea, select {
     width: 100%;
     box-sizing: border-box;
     padding: 12px 14px;
@@ -39,6 +41,14 @@
     color: var(--tg-theme-text-color, #111111);
     font-size: 16px;
     font-family: inherit;
+  }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888888'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
   }
   .row {
     display: flex;
@@ -62,19 +72,35 @@
   <h1>📍 Lieferadresse</h1>
   <p class="hint">Bitte gib an, wohin geliefert werden soll.</p>
 
+  <div class="row">
+    <div>
+      <label for="nachname">Name</label>
+      <input id="nachname" type="text" autocomplete="family-name">
+    </div>
+    <div>
+      <label for="vorname">Vorname</label>
+      <input id="vorname" type="text" autocomplete="given-name">
+    </div>
+  </div>
+
   <label for="street">Strasse und Hausnummer</label>
-  <input id="street" type="text" placeholder="Musterstrasse 12" autocomplete="street-address">
+  <input id="street" type="text" autocomplete="street-address">
 
   <div class="row">
     <div>
       <label for="zip">PLZ</label>
-      <input id="zip" type="text" inputmode="numeric" placeholder="12345" autocomplete="postal-code">
+      <input id="zip" type="text" inputmode="numeric" autocomplete="postal-code">
     </div>
     <div class="city">
       <label for="city">Ort</label>
-      <input id="city" type="text" placeholder="Musterstadt" autocomplete="address-level2">
+      <input id="city" type="text" autocomplete="address-level2">
     </div>
   </div>
+
+  <label for="land">Land</label>
+  <select id="land">
+    <option value="Schweiz" selected>Schweiz</option>
+  </select>
 
   <label for="notes">Hinweise (optional)</label>
   <textarea id="notes" rows="2" placeholder="z.B. Stockwerk, Klingelname"></textarea>
@@ -86,14 +112,18 @@
   tg.ready();
   tg.expand();
 
+  var nachname = document.getElementById('nachname');
+  var vorname = document.getElementById('vorname');
   var street = document.getElementById('street');
   var zip = document.getElementById('zip');
   var city = document.getElementById('city');
+  var land = document.getElementById('land');
   var notes = document.getElementById('notes');
   var errorEl = document.getElementById('error');
 
   function isValid() {
-    return street.value.trim() && zip.value.trim() && city.value.trim();
+    return nachname.value.trim() && vorname.value.trim() && street.value.trim()
+      && zip.value.trim() && city.value.trim();
   }
 
   function updateButton() {
@@ -105,7 +135,7 @@
     }
   }
 
-  [street, zip, city, notes].forEach(function (el) {
+  [nachname, vorname, street, zip, city, notes].forEach(function (el) {
     el.addEventListener('input', updateButton);
   });
 
@@ -115,13 +145,16 @@
 
   tg.MainButton.onClick(function () {
     if (!isValid()) {
-      errorEl.textContent = 'Bitte Strasse, PLZ und Ort ausfuellen.';
+      errorEl.textContent = 'Bitte Name, Vorname, Strasse, PLZ und Ort ausfuellen.';
       return;
     }
     var data = {
+      name: nachname.value.trim(),
+      vorname: vorname.value.trim(),
       street: street.value.trim(),
       zip: zip.value.trim(),
       city: city.value.trim(),
+      land: land.value,
       notes: notes.value.trim()
     };
     tg.sendData(JSON.stringify(data));
@@ -129,5 +162,3 @@
 </script>
 </body>
 </html>
-
-
